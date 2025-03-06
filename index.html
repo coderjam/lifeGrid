@@ -172,7 +172,7 @@
             const fillToDateBtn = document.getElementById('fillToDateBtn');
             const selectedInfo = document.getElementById('selectedInfo');
             const birthInfo = document.getElementById('birthInfo');
-            let birthDate = null;
+            let lifeGridBirthDate = null;
             let filledCount = 0;
             
             // 创建900个格子
@@ -184,13 +184,23 @@
                 grid.appendChild(gridItem);
             }
             
+            // 从本地存储加载出生年月
+            const savedBirthDate = localStorage.getItem('lifeGridBirthDate');
+            if (savedBirthDate) {
+                lifeGridBirthDate = new Date(JSON.parse(savedBirthDate));
+                fillGridToDate(lifeGridBirthDate);
+                const birthYear = lifeGridBirthDate.getFullYear();
+                const birthMonth = lifeGridBirthDate.getMonth() + 1;
+                birthInfo.textContent = `出生年月: ${birthYear}年${birthMonth}月`;
+            }
+            
             // 重置按钮
             resetBtn.addEventListener('click', function() {
                 const items = document.querySelectorAll('.grid-item');
                 items.forEach(item => {
                     item.classList.remove('filled', 'stage-0', 'stage-1', 'stage-2', 'stage-3');
                 });
-                localStorage.removeItem('birthDate');
+                localStorage.removeItem('lifeGridBirthDate');
                 birthInfo.textContent = '出生年月: 未设置';
                 updateCount();
             });
@@ -205,17 +215,17 @@
                     return;
                 }
                 
-                birthDate = new Date(birthYear, birthMonth - 1);
-                localStorage.setItem('birthDate', JSON.stringify(birthDate));
+                lifeGridBirthDate = new Date(birthYear, birthMonth - 1);
+                localStorage.setItem('lifeGridBirthDate', JSON.stringify(lifeGridBirthDate));
                 birthInfo.textContent = `出生年月: ${birthYear}年${birthMonth}月`;
-                fillGridToDate(birthDate);
+                fillGridToDate(lifeGridBirthDate);
             });
             
             // 填充格子的函数
-            function fillGridToDate(birthDate) {
+            function fillGridToDate(date) {
                 const today = new Date();
-                const totalMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + 
-                                  (today.getMonth() - birthDate.getMonth() + 1);
+                const totalMonths = (today.getFullYear() - date.getFullYear()) * 12 + 
+                                  (today.getMonth() - date.getMonth() + 1);
                 
                 if (totalMonths <= 0) {
                     alert('您输入的出生日期在未来！');
