@@ -145,7 +145,12 @@
     <h1>人生网格 - 900个月</h1>
     <div class="description">
         <p>这个网格展示了一个人生中的900个月（75年）。每个格子代表一个月。</p>
-        <p>点击格子可以标记已经度过的月份，不同颜色代表不同的人生阶段。</p>
+        <p>不同颜色代表不同的人生阶段：
+            <span style="display: inline-block; width: 12px; height: 12px; background-color: #4fc3f7; margin: 0 4px;"></span>0-20年，
+            <span style="display: inline-block; width: 12px; height: 12px; background-color: #81c784; margin: 0 4px;"></span>20-40年，
+            <span style="display: inline-block; width: 12px; height: 12px; background-color: #ffb74d; margin: 0 4px;"></span>40-60年，
+            <span style="display: inline-block; width: 12px; height: 12px; background-color: #e57373; margin: 0 4px;"></span>60-80年
+        </p>
     </div>
     
     <div class="grid-container" id="lifeGrid"></div>
@@ -176,24 +181,7 @@
                 gridItem.className = 'grid-item';
                 gridItem.dataset.index = i;
                 gridItem.dataset.stage = Math.floor(i / 240);
-                
-                gridItem.addEventListener('click', function() {
-                    this.classList.toggle('filled');
-                    this.classList.toggle(`stage-${this.dataset.stage}`);
-                    updateCount();
-                });
-                
                 grid.appendChild(gridItem);
-            }
-            
-            // 从本地存储加载出生年月
-            const savedBirthDate = localStorage.getItem('birthDate');
-            if (savedBirthDate) {
-                birthDate = new Date(JSON.parse(savedBirthDate));
-                fillGridToDate(birthDate);
-                const birthYear = birthDate.getFullYear();
-                const birthMonth = birthDate.getMonth() + 1;
-                birthInfo.textContent = `出生年月: ${birthYear}年${birthMonth}月`;
             }
             
             // 重置按钮
