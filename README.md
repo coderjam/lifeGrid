@@ -1,6 +1,8 @@
 # LifeGrid
 人生900格
 
+仓库地址: [@https://github.com/coderjam/lifeGrid](https://github.com/coderjam/lifeGrid)
+
 ## 项目描述
 这是一个展示人生900个月（75年）的网格可视化工具。每个小格子代表一个月，不同颜色代表不同的人生阶段。用户可以通过输入出生年月，自动计算并标记已经度过的月份。
 
