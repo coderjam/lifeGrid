@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人生网格 - 900个月</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .description {
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #666;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(30, 20px);
+            grid-template-rows: repeat(30, 20px);
+            gap: 2px;
+            background-color: #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .grid-item {
+            width: 20px;
+            height: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            transition: background-color 0.3s;
+        }
+        
+        .grid-item:hover {
+            background-color: #e0f7fa;
+            cursor: pointer;
+        }
+        
+        .filled.stage-0 { background-color: #4fc3f7; } /* 0-20年 */
+        .filled.stage-1 { background-color: #81c784; } /* 20-40年 */
+        .filled.stage-2 { background-color: #ffb74d; } /* 40-60年 */
+        .filled.stage-3 { background-color: #e57373; } /* 60-80年 */
+        
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background-color: #0b7dda;
+        }
+        
+        .info {
+            margin-top: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>人生网格 - 900个月</h1>
+    <div class="description">
+        <p>这个网格展示了一个人生中的900个月（75年）。每个格子代表一个月。</p>
+        <p>点击格子可以标记已经度过的月份，不同颜色代表不同的人生阶段。</p>
+    </div>
+    
+    <div class="grid-container" id="lifeGrid"></div>
+    
+    <div class="controls">
+        <button id="resetBtn">重置</button>
+        <button id="fillToDateBtn">填充至今</button>
+    </div>
+    
+    <div class="info">
+        <p id="selectedInfo">已选择: 0 个月 (0 年 0 个月)</p>
+        <p id="birthInfo">出生年月: 未设置</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const grid = document.getElementById('lifeGrid');
+            const resetBtn = document.getElementById('resetBtn');
+            const fillToDateBtn = document.getElementById('fillToDateBtn');
+            const selectedInfo = document.getElementById('selectedInfo');
+            const birthInfo = document.getElementById('birthInfo');
+            let birthDate = null;
+            let filledCount = 0;
+            
+            // 创建900个格子
+            for (let i = 0; i < 900; i++) {
+                const gridItem = document.createElement('div');
+                gridItem.className = 'grid-item';
+                gridItem.dataset.index = i;
+                gridItem.dataset.stage = Math.floor(i / 240);
+                
+                gridItem.addEventListener('click', function() {
+                    this.classList.toggle('filled');
+                    this.classList.toggle(`stage-${this.dataset.stage}`);
+                    updateCount();
+                });
+                
+                grid.appendChild(gridItem);
+            }
+            
+            // 从本地存储加载出生年月
+            const savedBirthDate = localStorage.getItem('birthDate');
+            if (savedBirthDate) {
+                birthDate = new Date(JSON.parse(savedBirthDate));
+                fillGridToDate(birthDate);
+                const birthYear = birthDate.getFullYear();
+                const birthMonth = birthDate.getMonth() + 1;
+                birthInfo.textContent = `出生年月: ${birthYear}年${birthMonth}月`;
+            }
+            
+            // 重置按钮
+            resetBtn.addEventListener('click', function() {
+                const items = document.querySelectorAll('.grid-item');
+                items.forEach(item => {
+                    item.classList.remove('filled', 'stage-0', 'stage-1', 'stage-2', 'stage-3');
+                });
+                localStorage.removeItem('birthDate');
+                birthInfo.textContent = '出生年月: 未设置';
+                updateCount();
+            });
+            
+            // 填充至今按钮
+            fillToDateBtn.addEventListener('click', function() {
+                const birthYear = parseInt(prompt('请输入您的出生年份:', '1990'));
+                const birthMonth = parseInt(prompt('请输入您的出生月份 (1-12):', '1'));
+                
+                if (isNaN(birthYear) || isNaN(birthMonth) || birthMonth < 1 || birthMonth > 12) {
+                    alert('请输入有效的年份和月份！');
+                    return;
+                }
+                
+                birthDate = new Date(birthYear, birthMonth - 1);
+                localStorage.setItem('birthDate', JSON.stringify(birthDate));
+                birthInfo.textContent = `出生年月: ${birthYear}年${birthMonth}月`;
+                fillGridToDate(birthDate);
+            });
+            
+            // 填充格子的函数
+            function fillGridToDate(birthDate) {
+                const today = new Date();
+                const totalMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + 
+                                  (today.getMonth() - birthDate.getMonth() + 1);
+                
+                if (totalMonths <= 0) {
+                    alert('您输入的出生日期在未来！');
+                    return;
+                }
+                
+                const items = document.querySelectorAll('.grid-item');
+                items.forEach((item, index) => {
+                    if (index < totalMonths) {
+                        item.classList.add('filled', `stage-${item.dataset.stage}`);
+                    } else {
+                        item.classList.remove('filled', 'stage-0', 'stage-1', 'stage-2', 'stage-3');
+                    }
+                });
+                
+                updateCount();
+            }
+            
+            // 更新计数
+            function updateCount() {
+                const filledItems = document.querySelectorAll('.grid-item.filled');
+                filledCount = filledItems.length;
+                const years = Math.floor(filledCount / 12);
+                const months = filledCount % 12;
+                selectedInfo.textContent = `已选择: ${filledCount} 个月 (${years} 年 ${months} 个月)`;
+            }
+        });
+    </script>
+</body>
+</html> 
